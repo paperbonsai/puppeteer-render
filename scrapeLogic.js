@@ -1,10 +1,21 @@
 const puppeteer = require("puppeteer");
+require("dotenv").cofig();
 const scrapeLogic = async (res) => {
   // Launch the browser and open a new blank page
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: [ 
+        "--disable-setuid-sandbox",
+        "--single-process",
+        "--no-zygote",
+        "--no-sandbox",
+    ],
+    executablePath:
+      process.env.NODE_ENV === "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH
+        : puppeteer.executablePath(),
+  });
   try {
     const page = await browser.newPage();
-    
 
     // Navigate the page to a URL
     await page.goto("https://developer.chrome.com/");
@@ -32,7 +43,7 @@ const scrapeLogic = async (res) => {
     res.send(logStatement);
   } catch (e) {
     console.error(e);
-    res.send ("Error: " + e);
+    res.send("Error: " + e);
   } finally {
     await browser.close();
   }
