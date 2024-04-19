@@ -2,51 +2,39 @@ const puppeteer = require("puppeteer");
 require("dotenv").config();
 
 const scrapeLogic = async (res) => {
-  let browser;
+  const browser = await puppeteer.launch({
+    args: [
+      "--disable-setuid-sandbox",
+      "--no-sandbox",
+      "--single-process",
+      "--no-zygote",
+    ],
+    executablePath:
+      process.env.NODE_ENV === "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH
+        : puppeteer.executablePath(),
+  });
   try {
-    // Launch the browser
-    browser = await puppeteer.launch({
-      args: [
-        "--disable-setuid-sandbox",
-        "--single-process",
-        "--no-zygote",
-        "--no-sandbox",
-      ],
-      executablePath:
-        process.env.NODE_ENV === "production"
-          ? process.env.PUPPETEER_EXECUTABLE_PATH
-          : puppeteer.executablePath(),
-    });
-
-    // Create a new page instance
     const page = await browser.newPage();
 
-    // Navigate to the page
-    const navigationPromise = page.goto("https://developer.chrome.com/");
-
-    // Wait for navigation to complete
-    await navigationPromise;
+    await page.goto("https://developer.chrome.com/");
 
     // Set screen size
     await page.setViewport({ width: 1080, height: 1024 });
 
     // Type into search box
-    await page.type(".devsite-search-field", "automate beyond recorder");
+    await page.type(".search-box__input", "automate beyond recorder");
 
-    // Wait for search results
-    await page.waitForSelector(".devsite-result-item-link");
+    // Wait and click on first result
+    const searchResultSelector = ".search-box__link";
+    await page.waitForSelector(searchResultSelector);
+    await page.click(searchResultSelector);
 
-    // Click on the first search result
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: "domcontentloaded" }),
-      page.click(".devsite-result-item-link"),
-    ]);
-
-    // Get the full title of the page
-    const fullTitle = await page.$eval(
-      "h1.devsite-article-title",
-      (el) => el.textContent
+    // Locate the full title with a unique string
+    const textSelector = await page.waitForSelector(
+      "text/Customize and automate"
     );
+    const fullTitle = await textSelector.evaluate((el) => el.textContent);
 
     // Print the full title
     const logStatement = `The title of this blog post is ${fullTitle}`;
@@ -54,12 +42,9 @@ const scrapeLogic = async (res) => {
     res.send(logStatement);
   } catch (e) {
     console.error(e);
-    res.send("Error: " + e);
+    res.send(`Something went wrong while running Puppeteer: ${e}`);
   } finally {
-    // Close the browser
-    if (browser) {
-      await browser.close();
-    }
+    await browser.close();
   }
 };
 
