@@ -1,5 +1,5 @@
 const puppeteer = require("puppeteer");
-require("dotenv").cofig();
+require("dotenv").config();
 const scrapeLogic = async (res) => {
   // Launch the browser and open a new blank page
   const browser = await puppeteer.launch({
