@@ -17,29 +17,24 @@ const scrapeLogic = async (res) => {
   try {
     const page = await browser.newPage();
 
-    await page.goto("https://developer.chrome.com/");
+    await page.goto("https://simplecode.cz");
 
-    // Set screen size
-    await page.setViewport({ width: 1080, height: 1024 });
+    // Wait for h1 element to appear
+    await page.waitForSelector("h1");
 
-    // Type into search box
-    await page.type(".search-box__input", "automate beyond recorder");
+    // Get the text content of the h1 element
+    const h1Text = await page.evaluate(() => {
+      const h1Element = document.querySelector("h1");
+      return h1Element ? h1Element.textContent.trim() : null;
+    });
 
-    // Wait and click on first result
-    const searchResultSelector = ".search-box__link";
-    await page.waitForSelector(searchResultSelector);
-    await page.click(searchResultSelector);
-
-    // Locate the full title with a unique string
-    const textSelector = await page.waitForSelector(
-      "text/Customize and automate"
-    );
-    const fullTitle = await textSelector.evaluate((el) => el.textContent);
-
-    // Print the full title
-    const logStatement = `The title of this blog post is ${fullTitle}`;
-    console.log(logStatement);
-    res.send(logStatement);
+    if (h1Text) {
+      const logStatement = `The h1 text of the page is: ${h1Text}`;
+      console.log(logStatement);
+      res.send(logStatement);
+    } else {
+      res.send("No h1 element found on the page.");
+    }
   } catch (e) {
     console.error(e);
     res.send(`Something went wrong while running Puppeteer: ${e}`);
