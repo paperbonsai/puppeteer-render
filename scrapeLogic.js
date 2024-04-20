@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 require("dotenv").config();
 
 const config = {
-  baseUrl: "https://aukro.cz/videokamery",
+  baseUrl: "https://aukro.cz/pc-graficke-karty",
   userAgent:
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0",
   nextPageSelector:
@@ -12,10 +12,14 @@ const config = {
   launchOptions: {
     headless: true,
     args: [
-      "--disable-setuid-sandbox",
       "--no-sandbox",
-      "--single-process",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--no-first-run",
       "--no-zygote",
+      "--single-process",
+      "--disable-gpu",
     ],
     executablePath:
       process.env.NODE_ENV === "production"
@@ -66,7 +70,7 @@ async function scrapePages(page) {
 
   while (true) {
     console.log(`Navigating to ${url}...`);
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
     await autoScroll(page);
 
     const h2Texts = await page.$$eval(config.itemSelector, (elements) =>
