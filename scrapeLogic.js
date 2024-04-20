@@ -6,20 +6,21 @@ const config = {
   userAgent:
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0",
   nextPageSelector:
-    "a.page-number.next > i",
+    "auk-listing-items-list > div > auk-pagination-control > a.page-number.next > i",
   itemSelector:
     "a.item-card-main-container > div.item-card-body-wrapper > div.item-card-body-wrapper-top-container > auk-basic-item-card-title > h2",
   launchOptions: {
     headless: true,
     args: [
-      '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        //'--single-process',
-        '--disable-gpu'
+      "--no-sandbox",
+      "--single-process",
+      "--no-zygote",
+      "--disable-setuid-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--disable-gpu-compositing",
+      "--disable-software-rasterizer", // Only if you don't need WebGL or 3D CSS transforms.
     ],
     executablePath:
       process.env.NODE_ENV === "production"
